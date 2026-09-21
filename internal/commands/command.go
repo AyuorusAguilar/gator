@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-	"github.com/google/uuid"
+
 	"github.com/AyuorusAguilar/gator/internal/config"
 	"github.com/AyuorusAguilar/gator/internal/database"
+	"github.com/AyuorusAguilar/gator/internal/rss"
 	"github.com/AyuorusAguilar/gator/internal/state"
+	"github.com/google/uuid"
 )
 type Command struct {
 	Name string
@@ -102,4 +104,13 @@ func HandlerReset(s *state.State, cmd Command) error {
 		return nil
 	}
 	
+ }
+ 
+ func HandlerAggregator(s *state.State, cmd Command) error {
+	content, err := rss.FetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+	if err != nil {
+		return fmt.Errorf("Error:\n\t??? A truly unexpected event...\n%v\n", err)
+	}
+	fmt.Printf("Content:\n%v", content)
+	return nil
  }
