@@ -13,8 +13,13 @@ RETURNING *;
 SELECT * FROM users
 WHERE name = $1;
 
+-- name: GetId :one
+SELECT id FROM users
+WHERE name = $1;
+
 -- name: GetUsers :many
-SELECT name FROM users;
+SELECT name, id FROM users;
 
 -- name: DropIsmu :exec
 DELETE FROM users;
+

@@ -1,0 +1,2 @@
+https://www.wagslane.dev/index.xml
+postgres://postgres:HyperLight123@localhost:5432/gator

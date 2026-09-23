@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,8 +27,8 @@ RETURNING id, created_at, updated_at, name, favorite_color
 
 type CreateUserParams struct {
 	ID            uuid.UUID
-	CreatedAt     sql.NullTime
-	UpdatedAt     sql.NullTime
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 	Name          string
 	FavoriteColor sql.NullString
 }
@@ -60,6 +61,18 @@ func (q *Queries) DropIsmu(ctx context.Context) error {
 	return err
 }
 
+const getId = `-- name: GetId :one
+SELECT id FROM users
+WHERE name = $1
+`
+
+func (q *Queries) GetId(ctx context.Context, name string) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getId, name)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getUser = `-- name: GetUser :one
 SELECT id, created_at, updated_at, name, favorite_color FROM users
 WHERE name = $1
@@ -79,22 +92,27 @@ func (q *Queries) GetUser(ctx context.Context, name string) (User, error) {
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT name FROM users
+SELECT name, id FROM users
 `
 
-func (q *Queries) GetUsers(ctx context.Context) ([]string, error) {
+type GetUsersRow struct {
+	Name string
+	ID   uuid.UUID
+}
+
+func (q *Queries) GetUsers(ctx context.Context) ([]GetUsersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getUsers)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []string
+	var items []GetUsersRow
 	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
+		var i GetUsersRow
+		if err := rows.Scan(&i.Name, &i.ID); err != nil {
 			return nil, err
 		}
-		items = append(items, name)
+		items = append(items, i)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

@@ -57,7 +57,7 @@ func FetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error) {
 }
 
 func cleanEscapedEntities(Rssfeed RSSFeed) RSSFeed {
-	fmt.Printf("\n\nHey! I'm doing the thing!\n\n")
+	fmt.Printf("\n\nFetched!\n\n")
 	Rssfeed.Channel.Title = html.UnescapeString(Rssfeed.Channel.Title)
 	Rssfeed.Channel.Description = html.UnescapeString(Rssfeed.Channel.Description)
 	for i := range Rssfeed.Channel.Item {
